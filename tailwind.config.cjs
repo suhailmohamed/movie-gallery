@@ -1,3 +1,5 @@
+const { default: plugin } = require('tailwindcss')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -8,7 +10,25 @@ module.exports = {
     fontFamily: {
       sans: ['Open Sans', 'sans-serif']
     },
-    extend: {},
+    extend: {
+      transitionProperty: {
+        'width': 'width' 
+      }
+    },
   },
-  plugins: [],
+  plugins: [
+    // plugin(function ({ addUtilities }) {
+    //   addUtilities({
+    //     '.hide-scrollbar': {
+    //       '-ms-overflow-style': 'none',  // IE and Edge 
+    //       'scrollbar-width': 'none',  // Firefox
+
+    //       /* Chrome, Safari and Opera */
+    //       '&::-webkit-scrollbar': {
+    //         display: 'none'
+    //       }
+    //     }
+    //   })
+    // })
+  ],
 }
