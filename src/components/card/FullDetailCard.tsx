@@ -9,6 +9,9 @@ export interface FullDetailCardProps {
   directorName: string
   language: string
   plot: string
+  showPoster: boolean
+  onClickPlay: () => unknown
+  onClickWatchTrailer: () => unknown
 }
 
 export const FullDetailCard: FC<FullDetailCardProps> = ({
@@ -19,7 +22,10 @@ export const FullDetailCard: FC<FullDetailCardProps> = ({
     runTime,
     directorName,
     language,
-    plot
+    plot,
+    showPoster = false,
+    onClickPlay,
+    onClickWatchTrailer
 }: FullDetailCardProps) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [imdbRating, setImdbRating] = useState('');
@@ -35,18 +41,20 @@ export const FullDetailCard: FC<FullDetailCardProps> = ({
         setTimeout(() => {
             setImdbRating(rating)
         }, 500)
-    }, []);
+    }, [rating]);
     
     return (
-        <div className="bg-[#394B61] h-72 lg:h-[388px] flex flex-row rounded-[11px] overflow-hidden">
+        <div className="bg-[#394B61] h-full flex flex-row rounded-[11px] overflow-hidden">
             <img 
-                className="w-40 sm:w-56 xl:w-[340px] h-full object-cover fadeInOut"
+                className={`w-40 sm:w-56 xl:w-[340px] h-full object-cover
+                    ${showPoster ? 'fadeInOut' : ' opacity-0'}
+                `}
                 src={poster[imageIndex]}
                 alt={title}
             />
 
-            <div className="card-right-content flex-1 p-4 sm:p-6 xl:pl-11 xl:pr-11 xl:pt-8 xl:pb-6 space-y-3 xl:space-y-6">
-                <h2 className="text-[#D4D7DD] text-lg lg:text-3xl font-bold">{title}</h2>
+            <div className="card-right-content flex-1 p-3.5 sm:p-6 xl:pl-11 xl:pr-11 xl:pt-8 xl:pb-6 space-y-3 xl:space-y-6">
+                <h2 className="text-[#D4D7DD] text-base lg:text-3xl font-bold">{title}</h2>
 
                 <div className="flex items-center gap-3">
                     <div className={`w-28 bg-[#283647] rounded-full h-2 ${rating === 'N/A' ? ' bg-[#283647]/50' : ''}`}>
@@ -62,18 +70,18 @@ export const FullDetailCard: FC<FullDetailCardProps> = ({
                 </div>
 
                 <div className="space-y-3 lg:space-y-4">
-                    <ul className="max-w-[200px] sm:max-w-lg flex flex-col text-[#D4D7DD] text-xs lg:text-base font-semibold space-y-1">
+                    <ul className="max-w-[168px] sm:max-w-lg flex flex-col text-[#D4D7DD] text-xs lg:text-base font-semibold whitespace-nowrap space-y-1">
                         <li className="inline-flex items-center">
                             <span className="min-w-[92px] lg:min-w-[140px] inline-block">Year:</span> 
-                            <span>{releasedYear}</span>
+                            <span className="truncate">{releasedYear}</span>
                         </li>
                         <li className="inline-flex items-center">
                             <span className="min-w-[92px] lg:min-w-[140px] inline-block">Running Time:</span> 
-                            <span>{runTime}</span>
+                            <span className="truncate">{runTime}</span>
                         </li>
                         <li className="inline-flex items-center">
                             <span className="min-w-[92px] lg:min-w-[140px] inline-block">Directed by:</span> 
-                            <span>{directorName}</span>
+                            <span className="truncate">{directorName}</span>
                         </li>
                         <li className="inline-flex items-center">
                             <span className="min-w-[92px] lg:min-w-[140px] inline-block">language:</span> 
@@ -87,12 +95,14 @@ export const FullDetailCard: FC<FullDetailCardProps> = ({
                         <button
                             type='button'
                             className="bg-[#00E0FF] lg:w-40 h-9 lg:h-10 inline-flex items-center justify-center px-2 sm:px-3 lg:px-5 text-xs lg:text-base text-black font-bold rounded-md focus:outline-none"
+                            onClick={onClickPlay}
                         >
                             Play Movie  
                         </button>
                         <button
                             type='button'
                             className="bg-transparent lg:w-40 h-9 lg:h-10 inline-flex items-center justify-center px-2 sm:px-3 lg:px-5 text-xs lg:text-base text-[#00E0FF] font-bold border border-[#00E0FF] rounded-md focus:outline-none"
+                            onClick={onClickWatchTrailer}
                         >
                             Watch Trailer
                         </button>

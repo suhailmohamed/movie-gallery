@@ -11,9 +11,9 @@ import { IconWatchLater } from './components/icons/IconWatchLater'
 import { IconDayMode } from './components/icons/IconDayMode'
 import { IconDotsVertical } from './components/icons/IconDotsVertical'
 import { Card } from './components/card/Card'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IconClose } from './components/icons/IconClose'
-import { MovieData } from './api/MoviewData'
+import { MovieData } from './api/MovieData'
 import Fuse from 'fuse.js'
 import { FullDetailCard } from './components/card/FullDetailCard'
 import { MobileHeader } from './components/mobileheader/MobileHeader'
@@ -57,6 +57,8 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [selectedIndex, setSelectedIndex] = useState([0, 1])
   const [showFullDetailsCard, setShowFullDetailsCard] = useState(false)
+  const [animatedCard, setAnimatedCard] = useState(false)
+  const [showFullDetailCardPoster, setShowFullDetailCardPoster] = useState(false)
 
   // movies data 
   const movieList = MovieData
@@ -71,6 +73,15 @@ function App() {
 
   const chunkSize = isMobileDevice ? 2 : isTablet ? 3 : 5
   const resultChunk = chunk(result, chunkSize)
+
+  useEffect(() => {
+    setTimeout(() => {
+      setAnimatedCard(showFullDetailsCard)
+    }, 200),
+    setTimeout(() => {
+      setShowFullDetailCardPoster(showFullDetailsCard)
+    }, 600)
+  }, [showFullDetailsCard]);
   
   return (
     <div className="App">
@@ -203,25 +214,30 @@ function App() {
                         return (
                           <Transition 
                             key={i.toString()}
-                            as={'div'}
                             show={showFullDetailsCard && selectedIndex[0] === index && selectedIndex[1] === i}
-                            enter='transform transition duration-[400ms]'
-                            enterFrom='opacity-0 scale-y-10'
-                            enterTo='opacity-100 scale-y-100'
-                            leave='transform duration-200 transition ease-in-out'
-                            leaveFrom='opacity-100 scale-y-100'
-                            leaveTo='opacity-0 scale-y-95'
+                            enter="transition-opacity duration-75"
+                            enterFrom="opacity-0"
+                            enterTo="opacity-100"
+                            leave="transition-opacity duration-150"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                            className="relative h-72 lg:h-[388px]"
                           >
-                            <FullDetailCard 
-                              poster={movie.Images}
-                              title={movie.Title}
-                              rating={movie.imdbRating}
-                              releasedYear={movie.Year}
-                              runTime={movie.Runtime}
-                              directorName={movie.Director}
-                              language={movie.Language}
-                              plot={movie.Plot}
-                            />
+                            <div className={`${animatedCard ? 'w-full h-full opacity-100 ' : 'h-20 opacity-0'} absolute top-2/4 -translate-y-2/4 transform transition-all duration-700`}>
+                              <FullDetailCard 
+                                poster={movie.Images}
+                                title={movie.Title}
+                                rating={movie.imdbRating}
+                                releasedYear={movie.Year}
+                                runTime={movie.Runtime}
+                                directorName={movie.Director}
+                                language={movie.Language}
+                                plot={movie.Plot}
+                                showPoster={showFullDetailCardPoster}
+                                onClickPlay={() => toast(`Play ${movie.Title} movie`)}
+                                onClickWatchTrailer={() => toast(`Watch ${movie.Title} movie trailer`)}
+                              />
+                            </div>
                           </Transition>
                         )
                       })}
