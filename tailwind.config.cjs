@@ -1,4 +1,4 @@
-const { default: plugin } = require('tailwindcss')
+// const { default: plugin } = require('tailwindcss')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -30,5 +30,6 @@ module.exports = {
     //     }
     //   })
     // })
+    require('@tailwindcss/line-clamp'),
   ],
 }

@@ -22,3 +22,42 @@
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance:none;
 }
+
+.fadeInOut {
+  animation: fadeInOut 4s infinite;
+}
+
+@keyframes fadeInOut {
+  0%{
+    opacity:0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100%
+  {
+    opacity:0;
+  }
+}
+
+.card-right-content {
+  opacity: 0;
+  animation: fadeInAnimation .3s ease-in 0;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+  -webkit-animation-delay: .3s;
+  animation-delay: .3s;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(10px); 
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0); 
+  } 
+}

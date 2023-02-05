@@ -1,4 +1,3 @@
-import './App.css'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { IconHeart } from './components/icons/IconHeart'
 import { IconList } from './components/icons/IconList'
@@ -11,12 +10,18 @@ import { IconTvShow } from './components/icons/IconTvShow'
 import { IconWatchLater } from './components/icons/IconWatchLater'
 import { IconDayMode } from './components/icons/IconDayMode'
 import { IconDotsVertical } from './components/icons/IconDotsVertical'
-import { MovieCard } from './components/moviecard/MovieCard'
+import { Card } from './components/card/Card'
 import { useRef, useState } from 'react'
-import { IconBar } from './components/icons/IconBar'
 import { IconClose } from './components/icons/IconClose'
-import { Movie } from './api/Moview'
+import { MovieData } from './api/MoviewData'
 import Fuse from 'fuse.js'
+import { FullDetailCard } from './components/card/FullDetailCard'
+import { MobileHeader } from './components/mobileheader/MobileHeader'
+import { toast, Toaster } from 'react-hot-toast'
+import chunk from 'lodash.chunk'
+import { Transition } from '@headlessui/react'
+import { useIsMobile } from './hooks/useIsMobile'
+import { useIsTablet } from './hooks/useIsTablet'
 
 const navigationLink = [
   {
@@ -42,22 +47,30 @@ const navigationLink = [
   }
 ]
 
+
 function App() {
+  const isMobileDevice = useIsMobile()
+  const isTablet = useIsTablet()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const [selectedIndex, setSelectedIndex] = useState([0, 1])
+  const [showFullDetailsCard, setShowFullDetailsCard] = useState(false)
 
-  const movieList = Movie
+  // movies data 
+  const movieList = MovieData
 
   const fuse = new Fuse(movieList, {
     includeMatches: true,
     includeScore: true,
-    keys: ['Title'],
+    keys: ['Title', 'Director', 'Language', 'Year'],
     threshold: 0.3
   })
-
   const result = searchQuery ? fuse.search(searchQuery).map((each) => each.item) : movieList
+
+  const chunkSize = isMobileDevice ? 2 : isTablet ? 3 : 5
+  const resultChunk = chunk(result, chunkSize)
   
   return (
     <div className="App">
@@ -71,32 +84,13 @@ function App() {
 
       <div className="flex flex-col lg:pl-64">
         <main className="flex flex-col flex-1 gap-3">
-          {/* Mobile Header Starts Here */}
-          <header className="sticky top-0 bg-[#273244] h-14 flex items-center justify-between px-4 z-40 lg:hidden">
-            <button
-              type='button'
-              className="focus:outline-none"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="sr-only">Open sidebar</span>
-              <IconBar className="w-6 h-6 text-[#D4D7DD]" />
-            </button>
+          <MobileHeader 
+            openSidebar={() => setSidebarOpen(true)}
+            onClickDayModeIcon={() => toast('Clicked Day Mode Icon')}
+            onClickDotsVerticalIcon={() => toast('Clicked Dots Vertical Icon')}
+          />
 
-            <div className="flex items-center gap-[25px] ml-auto">
-              <button type='button' className="focus:outline-none">
-                <span className="sr-only">Icon Day mode</span>
-                <IconDayMode className="w-6 h-6 text-[#D4D7DD]" />
-              </button>
-
-              <button type='button' className="focus:outline-none">
-                <span className="sr-only">Icon Dots vertical</span>
-                <IconDotsVertical className="w-6 h-6 text-[#D4D7DD]" />
-              </button>
-            </div>
-          </header>
-          {/* Mobile Header Ends Here */}
-
-          <div className="flex flex-col gap-4 lg:gap-10 p-4 pb-12 lg:p-12">
+          <div className="flex flex-col gap-6 lg:gap-10 p-4 pb-12 lg:p-12">
             {/* Mobile Search Section Starts Here */}
             <div className="flex lg:hidden flex-1 items-center">
               <div className="group relative bg-[#1A2536] w-full flex flex-shrink-0 items-center rounded-lg transition-all delay-100 overflow-hidden">
@@ -178,12 +172,20 @@ function App() {
                 </div>
                 
                 <div className="flex items-center gap-[25px] ml-auto">
-                  <button type='button' className="group focus:outline-none">
+                  <button 
+                    type='button' 
+                    className="group focus:outline-none"
+                    onClick={() => toast('Clicked Day Mode Icon')}
+                  >
                     <span className="sr-only">Icon Day mode</span>
                     <IconDayMode className="w-6 h-6 text-[#D4D7DD] group-hover:text-[#D4D7DD]/80 transition-colors" />
                   </button>
 
-                  <button type='button' className="group focus:outline-none">
+                  <button 
+                    type='button' 
+                    className="group focus:outline-none"
+                    onClick={() => toast('Clicked Dots Vertical Icon')}
+                  >
                     <span className="sr-only">Icon Dots vertical</span>
                     <IconDotsVertical className="w-6 h-6 text-[#D4D7DD] group-hover:text-[#D4D7DD]/80 transition-colors" />
                   </button>
@@ -192,19 +194,58 @@ function App() {
             </div>
             {/* Tablet & Desktop Search Section Starts Here */}
 
-            
-            {result.length ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-[26px]">
-                {result.map(( movie, index) => {
+            {resultChunk.length ? (
+              <>
+                {resultChunk.map((result , index)  => {
                   return (
-                    <MovieCard 
-                      key={index.toString()}
-                      name={movie.Title}
-                      poster={movie.Poster}
-                    />
+                    <div key={index.toString()} className="flex flex-col gap-6">
+                      {result.map(( movie, i) => {
+                        return (
+                          <Transition 
+                            key={i.toString()}
+                            as={'div'}
+                            show={showFullDetailsCard && selectedIndex[0] === index && selectedIndex[1] === i}
+                            enter='transform transition duration-[400ms]'
+                            enterFrom='opacity-0 scale-y-10'
+                            enterTo='opacity-100 scale-y-100'
+                            leave='transform duration-200 transition ease-in-out'
+                            leaveFrom='opacity-100 scale-y-100'
+                            leaveTo='opacity-0 scale-y-95'
+                          >
+                            <FullDetailCard 
+                              poster={movie.Images}
+                              title={movie.Title}
+                              rating={movie.imdbRating}
+                              releasedYear={movie.Year}
+                              runTime={movie.Runtime}
+                              directorName={movie.Director}
+                              language={movie.Language}
+                              plot={movie.Plot}
+                            />
+                          </Transition>
+                        )
+                      })}
+
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-[26px]">
+                        {result.map((movie, i) => {
+                          return (
+                            <Card 
+                              key={i.toString()}
+                              title={movie.Title}
+                              poster={movie.Poster}
+                              onClick={() => {
+                                setSelectedIndex([index, i])
+                                setShowFullDetailsCard(true)
+                              }}
+                            />
+                          )
+                        })}
+                      </div>
+                    </div>
                   )
-                })}
-              </div>
+                })} 
+              </>
             ) : (
               <p className="text-white text-lg lg:text-[21px] leading-[44px] font-semibold">
                 No results found for your search.
@@ -213,6 +254,11 @@ function App() {
           </div>
         </main>
       </div>
+
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      />
     </div>
   )
 }

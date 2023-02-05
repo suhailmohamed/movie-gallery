@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { FC, Fragment, ReactElement, useState } from 'react'
+import { FC, Fragment, ReactElement } from 'react'
 import ericHoffman from '../../assets/eric_hoffman.png'
 import { IconClose } from '../icons/IconClose'
 import { IconProps } from '../icons/IconProps'
