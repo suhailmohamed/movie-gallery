@@ -19,28 +19,29 @@
   }
 }
 
+/* CUSTOM CSS STARTS HERE */
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance:none;
 }
 
 .fadeInOut {
-  animation: fadeInOut 4s infinite;
+  animation: fadeInOut 8s infinite;
 }
 
 @keyframes fadeInOut {
   0%{
-    opacity:0;
+    opacity: 0;
   }
-  50% {
+  25% {
     opacity: 1;
   }
   100%
   {
-    opacity:0;
+    opacity: 0;
   }
 }
 
-.card-right-content {
+.animated-card-right-content {
   opacity: 0;
   animation: fadeInAnimation .3s ease-in 0;
   -webkit-animation-iteration-count: 1;
@@ -61,3 +62,26 @@ input[type="search"]::-webkit-search-cancel-button {
     transform: translate(0); 
   } 
 }
+
+.expanded-card-wrapper {
+  opacity: 0;
+  animation: showExpandedCard .4s ease 0;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+  -webkit-animation-delay: .4s;
+  animation-delay: .4s;
+}
+
+@keyframes showExpandedCard {
+  0% {
+    opacity: 0;
+    height: 80px;
+  }
+  100% {
+    opacity: 1;
+    height: 100%;
+  } 
+}
+/* CUSTOM CSS ENDS HERE */

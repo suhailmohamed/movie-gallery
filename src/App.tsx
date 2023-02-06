@@ -1,4 +1,5 @@
 import { Sidebar } from './components/sidebar/Sidebar'
+import ericHoffman from './assets/eric_hoffman.png'
 import { IconHeart } from './components/icons/IconHeart'
 import { IconList } from './components/icons/IconList'
 import { IconLogout } from './components/icons/IconLogout'
@@ -11,11 +12,11 @@ import { IconWatchLater } from './components/icons/IconWatchLater'
 import { IconDayMode } from './components/icons/IconDayMode'
 import { IconDotsVertical } from './components/icons/IconDotsVertical'
 import { Card } from './components/card/Card'
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { IconClose } from './components/icons/IconClose'
 import { MovieData } from './api/MovieData'
 import Fuse from 'fuse.js'
-import { FullDetailCard } from './components/card/FullDetailCard'
+import { ExpandedCard } from './components/card/ExpandedCard'
 import { MobileHeader } from './components/mobileheader/MobileHeader'
 import { toast, Toaster } from 'react-hot-toast'
 import chunk from 'lodash.chunk'
@@ -51,14 +52,18 @@ const navigationLink = [
 function App() {
   const isMobileDevice = useIsMobile()
   const isTablet = useIsTablet()
+  // Sidebar Open State 
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
+  // Search Input Expanded State 
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  // Search Query State
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const [selectedIndex, setSelectedIndex] = useState([0, 1])
-  const [showFullDetailsCard, setShowFullDetailsCard] = useState(false)
-  const [animatedCard, setAnimatedCard] = useState(false)
-  const [showFullDetailCardPoster, setShowFullDetailCardPoster] = useState(false)
+
+  // Card Component States 
+  const [selectedIndex, setSelectedIndex] = useState([0, 0])
+  const [showExpandedCard, setShowExpandedCard] = useState(false)
+
 
   // movies data 
   const movieList = MovieData
@@ -73,15 +78,6 @@ function App() {
 
   const chunkSize = isMobileDevice ? 2 : isTablet ? 3 : 5
   const resultChunk = chunk(result, chunkSize)
-
-  useEffect(() => {
-    setTimeout(() => {
-      setAnimatedCard(showFullDetailsCard)
-    }, 200),
-    setTimeout(() => {
-      setShowFullDetailCardPoster(showFullDetailsCard)
-    }, 600)
-  }, [showFullDetailsCard]);
   
   return (
     <div className="App">
@@ -89,6 +85,10 @@ function App() {
         <Sidebar 
           openSidebar={sidebarOpen}
           closeSidebar={() => setSidebarOpen(false)}
+          userDetails={{
+            avatar: ericHoffman,
+            name: 'Eric Hoffman'
+          }}
           navigationLink={navigationLink}
         />        
       </div>
@@ -139,15 +139,15 @@ function App() {
             <div className="hidden lg:flex items-center gap-4">
               <div className="flex flex-1 items-center">
                 <div className={`group relative flex flex-shrink-0 items-center rounded-lg transition-all delay-100 overflow-hidden
-                    ${isExpanded ? ' bg-[#1A2536]  lg:w-4/5 xl:w-[567px]' : ' w-14 cursor-pointer pointer-events-none'}
+                    ${isSearchExpanded ? ' bg-[#1A2536]  lg:w-4/5 xl:w-[567px]' : ' w-14 cursor-pointer pointer-events-none'}
                   `}
                   onClick={() => {
-                    setIsExpanded(true)
+                    setIsSearchExpanded(true)
                     inputRef.current?.focus()
                   }}
                 >
                   <IconSearch 
-                    className={`absolute left-4 w-[23px] h-[23px] text-[#D4D7DD] ${isExpanded ? 'pointer-events-none' : 'pointer-events-auto'}`} 
+                    className={`absolute left-4 w-[23px] h-[23px] text-[#D4D7DD] ${isSearchExpanded ? 'pointer-events-none' : 'pointer-events-auto'}`} 
                   />
 
                   <input
@@ -156,13 +156,13 @@ function App() {
                     name="search"
                     id="search"
                     className={`bg-transparent w-full h-[55px] pl-[51px] pr-11 outline-none placeholder:text-[#7B828E] placeholder:text-lg lg:placeholder:text-[19px] placeholder:font-normal placeholder:transition-opacity placeholder:delay-150 placeholder:duration-500 text-lg lg:text-[21px] lg:leading-[44px] text-white font-semibold border-0
-                      ${isExpanded ? ' placeholder:opacity-100' : ' placeholder:opacity-0'}
+                      ${isSearchExpanded ? ' placeholder:opacity-100' : ' placeholder:opacity-0'}
                     `}
                     placeholder="Title, Movies, Keyword"
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onBlur={() => {
                       if (!searchQuery) {
-                        setIsExpanded(false)
+                        setIsSearchExpanded(false)
                       }
                     }}
                     value={searchQuery}
@@ -172,10 +172,10 @@ function App() {
                     type='button'
                     onClick={() => {
                       setSearchQuery('')
-                      setIsExpanded(false)
+                      setIsSearchExpanded(false)
                       inputRef.current?.focus()
                     }}
-                    className={`absolute right-5 transition-opacity focus:outline-none ${isExpanded ? ' opacity-100 delay-200 duration-500' : ' opacity-0 delay-75'}`}
+                    className={`absolute right-5 transition-opacity focus:outline-none ${isSearchExpanded ? ' opacity-100 delay-200 duration-500' : ' opacity-0 delay-75'}`}
                   >
                     <span className="sr-only">Clear Input Field</span>
                     <IconClose className="w-4 h-4 text-[#D4D7DD]" />
@@ -209,37 +209,41 @@ function App() {
               <>
                 {resultChunk.map((result , index)  => {
                   return (
-                    <div key={index.toString()} className="flex flex-col gap-6">
+                    <div key={index.toString()} className="flex flex-col gap-6 scroll-pt-0.5">
                       {result.map(( movie, i) => {
-                        return (
-                          <Transition 
-                            key={i.toString()}
-                            show={showFullDetailsCard && selectedIndex[0] === index && selectedIndex[1] === i}
-                            enter="transition-opacity duration-75"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="transition-opacity duration-150"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                            className="relative h-72 lg:h-[388px]"
-                          >
-                            <div className={`${animatedCard ? 'w-full h-full opacity-100 ' : 'h-20 opacity-0'} absolute top-2/4 -translate-y-2/4 transform transition-all duration-700`}>
-                              <FullDetailCard 
-                                poster={movie.Images}
-                                title={movie.Title}
-                                rating={movie.imdbRating}
-                                releasedYear={movie.Year}
-                                runTime={movie.Runtime}
-                                directorName={movie.Director}
-                                language={movie.Language}
-                                plot={movie.Plot}
-                                showPoster={showFullDetailCardPoster}
-                                onClickPlay={() => toast(`Play ${movie.Title} movie`)}
-                                onClickWatchTrailer={() => toast(`Watch ${movie.Title} movie trailer`)}
-                              />
-                            </div>
-                          </Transition>
-                        )
+                        if(selectedIndex[0] === index && selectedIndex[1] === i) {
+                          return (
+                            <Transition 
+                              key={i.toString() + index.toString()}
+                              as={Fragment}
+                              show={showExpandedCard}
+                              enter="transition-opacity duration-75"
+                              enterFrom="opacity-0"
+                              enterTo="opacity-100"
+                              leave="transition-opacity duration-150"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                            >
+                              <div id="cover" className="relative h-72 lg:h-[388px] scroll-mt-6">
+                                <div className="expanded-card-wrapper w-full absolute top-2/4 -translate-y-2/4 transform transition-all duration-700">
+                                  <ExpandedCard 
+                                    poster={movie.Images}
+                                    title={movie.Title}
+                                    rating={movie.imdbRating}
+                                    releasedYear={movie.Year}
+                                    runTime={movie.Runtime}
+                                    directorName={movie.Director}
+                                    language={movie.Language}
+                                    plot={movie.Plot}
+                                    onClickPlay={() => toast(`Play ${movie.Title} movie`)}
+                                    onClickWatchTrailer={() => toast(`Watch ${movie.Title} movie trailer`)}
+                                  />
+                                </div>
+                              </div>
+                            </Transition>
+                          )
+                        }
+                        return null
                       })}
 
 
@@ -247,12 +251,19 @@ function App() {
                         {result.map((movie, i) => {
                           return (
                             <Card 
-                              key={i.toString()}
+                              key={i.toString() + index.toString()}
                               title={movie.Title}
                               poster={movie.Poster}
                               onClick={() => {
                                 setSelectedIndex([index, i])
-                                setShowFullDetailsCard(true)
+                                if(selectedIndex[0] === index && selectedIndex[1] === i) {
+                                  setShowExpandedCard(!showExpandedCard)
+                                } else {
+                                  setShowExpandedCard(true)
+                                }
+                                setTimeout(() => {
+                                  document.querySelector("#cover")?.scrollIntoView({behavior: 'smooth', block: 'center'});
+                                }, 100)
                               }}
                             />
                           )
