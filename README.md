@@ -1,10 +1,10 @@
-## 💻 QuillBot Exercise [![Netlify Status](https://api.netlify.com/api/v1/badges/b99cef85-025f-46ea-a0fe-a12d7f2e28c5/deploy-status)](https://app.netlify.com/sites/quillbot-exercise/deploys)
+## 💻 Movie Gallery [![Netlify Status](https://api.netlify.com/api/v1/badges/b99cef85-025f-46ea-a0fe-a12d7f2e28c5/deploy-status)](https://app.netlify.com/sites/quillbot-exercise/deploys)
 
 A simple Vite + React + TailwindCSS Project
 
 ## 🚀 Demo
 
-[http://quillbot-exercise.netlify.com/](http://quillbot-exercise.netlify.com/)
+[https://suhail-movie-gallery.netlify.app/](https://suhail-movie-gallery.netlify.app/)
 
 ## ❗Requirements [Completed : 4/4]
 
